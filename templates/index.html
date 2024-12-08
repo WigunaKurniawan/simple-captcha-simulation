@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulasi CAPTCHA</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #23272a; /* Warna background abu gelap */
+      color: #ffffff;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .console {
+      background-color: #2c2f33;
+      border: 3px solid #4caf50;
+      border-radius: 15px;
+      padding: 20px;
+      width: 400px;
+      text-align: center;
+      box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
+    }
+
+    .console h1 {
+      font-size: 24px;
+      color: #4caf50;
+      margin-bottom: 20px;
+    }
+
+    .captcha-container {
+      margin-bottom: 15px;
+    }
+
+    .captcha-container img {
+      border: 2px solid #4caf50;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+
+    .input-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 15px;
+    }
+
+    .input-container input {
+      padding: 10px;
+      font-size: 16px;
+      border: 2px solid #4caf50;
+      border-radius: 5px;
+      outline: none;
+      margin-right: 5px;
+      color: #121212;
+    }
+
+    .input-container button {
+      padding: 10px 15px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      background-color: #4caf50;
+      color: #ffffff;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .input-container button:hover {
+      background-color: #388e3c;
+    }
+
+    .hint {
+      font-size: 14px;
+      text-align: center;
+      color: #cccccc;
+      margin-top: 10px;
+    }
+
+    .hint span {
+      color: #4caf50;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="console">
+    <h1>🎮 Simulasi CAPTCHA</h1>
+    <div class="captcha-container">
+      <img id="captchaImage" src="/generate-captcha" alt="CAPTCHA">
+    </div>
+    <div class="input-container">
+      <input type="text" id="captchaInput" placeholder="Masukkan angka/huruf CAPTCHA">
+      <button onclick="validateCaptcha()">Submit</button>
+    </div>
+    <div class="input-container">
+      <button onclick="refreshCaptcha()">🔄 Refresh</button>
+    </div>
+    <div class="hint" id="hint">
+      💡 Hint: Masukkan kombinasi angka/huruf yang terlihat di atas.
+    </div>
+  </div>
+
+  <script>
+    function validateCaptcha() {
+      const userInput = document.getElementById("captchaInput").value;
+      
+      fetch("/validate-captcha", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ captcha_input: userInput })
+      })
+      .then(response => response.json())
+      .then(data => {
+        const hintElement = document.getElementById("hint");
+        if (data.success) {
+          hintElement.innerHTML = "✅ <span>Benar!</span> CAPTCHA akan direfresh...";
+          refreshCaptcha();
+        } else {
+          hintElement.innerHTML = "❌ <span>Salah!</span> Coba lagi.";
+        }
+      })
+      .catch(error => console.error("Error:", error));
+    }
+
+    function refreshCaptcha() {
+      const captchaImage = document.getElementById("captchaImage");
+      captchaImage.src = "/generate-captcha?" + new Date().getTime();
+      document.getElementById("captchaInput").value = ""; // Kosongkan input
+    }
+  </script>
+</body>
+</html>
